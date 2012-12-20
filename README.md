@@ -1,4 +1,4 @@
-# See Less Ess Ess
+# See-less-ess-ess
 
 TODO: Write a gem description
 
