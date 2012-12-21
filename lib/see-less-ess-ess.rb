@@ -4,7 +4,6 @@ require 'sass'
 require 'nokogiri'
 
 module SeeLessEssEss
-  VERSION = '0.0.2'
 
   class Extractor
     def initialize(glob)
