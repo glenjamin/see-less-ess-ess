@@ -5,8 +5,8 @@ module SeeLessEssEss
   VERSION = '0.0.1'
 
   class Extractor
-    def initialize(location)
-      @location = location
+    def initialize(glob)
+      @glob = glob
     end
 
     def css_classes
@@ -16,7 +16,7 @@ module SeeLessEssEss
     protected
 
     def files
-      Dir.glob("#{@location}/*.html")
+      Dir.glob(@glob)
     end
     def extract_css_classes!
       files.map do |file|
@@ -126,9 +126,9 @@ module SeeLessEssEss
     @@initialised = true
 
     Compass::Configuration.add_configuration_property(
-      :templates_location, "Directory to scan for template files") do
+      :templates_glob, "Glob to scan for template files") do
 
-      project_path
+      "#{project_path}/**/*.html"
     end
     Compass::Configuration.add_configuration_property(
       :used_css_classes, "CSS classes to explicity declare as 'used'") do
@@ -140,7 +140,7 @@ module SeeLessEssEss
       alias_method :_slss_to_tree, :_to_tree
       def _to_tree
         conf = Compass.configuration
-        extractor = SeeLessEssEss::Extractor.new(conf.templates_location)
+        extractor = SeeLessEssEss::Extractor.new(conf.templates_glob)
         checker = SeeLessEssEss::Checker.new(extractor, conf.used_css_classes)
 
         tree = _slss_to_tree
