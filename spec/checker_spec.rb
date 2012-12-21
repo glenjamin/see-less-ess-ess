@@ -5,8 +5,10 @@ module SeeLessEssEss
     let(:extractor) do
       mock("Extractor").tap do |m|
         m.stub!(:css_classes).and_return(parsed_css_classes)
+        m.stub!(:html_tags).and_return(parsed_html_tags)
       end
     end
+    let(:parsed_html_tags) { %w(html head title body h1 p td) }
     let(:parsed_css_classes) { %w(row columns one two top-bar) }
     let(:used_css_classes) { %w(zebra) }
 
@@ -46,6 +48,16 @@ module SeeLessEssEss
       it "should reject .class" do
         subject.does_not_use(
           sequence(simple_sequence(className('class')))
+        ).should be_true
+      end
+      it "should reject ul" do
+        subject.does_not_use(
+          sequence(simple_sequence(tag('ul')))
+        ).should be_true
+      end
+      it "should reject ul.row" do
+        subject.does_not_use(
+          sequence(simple_sequence(tag('ul'),className('class')))
         ).should be_true
       end
       it "should reject .row .class" do

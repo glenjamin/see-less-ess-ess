@@ -1,3 +1,5 @@
+require 'set'
+
 require 'sass'
 require 'nokogiri'
 
@@ -7,10 +9,16 @@ module SeeLessEssEss
   class Extractor
     def initialize(glob)
       @glob = glob
+      @extracted = false
     end
 
     def css_classes
-      @css_classes ||= extract_css_classes!
+      extract_if_needed
+      @css_classes
+    end
+    def html_tags
+      extract_if_needed
+      @html_tags
     end
 
     protected
@@ -18,24 +26,28 @@ module SeeLessEssEss
     def files
       Dir.glob(@glob)
     end
-    def extract_css_classes!
-      files.map do |file|
-        collector = Collector.new()
+    def extract_if_needed
+      collector = Collector.new()
+      files.each do |file|
         parser = Nokogiri::HTML::SAX::Parser.new(collector)
-        contents = open(file, 'rb').read
-        parser.parse(contents)
-        collector.css_classes
-      end.flatten
+        parser.parse(open(file, 'rb').read)
+      end
+      @css_classes = collector.css_classes
+      @html_tags = collector.html_tags
     end
 
     class Collector < Nokogiri::XML::SAX::Document
       def css_classes
-        @css_classes ||= []
+        @css_classes ||= Set.new
       end
-      def start_element(name, attrs = [])
+      def html_tags
+        @html_tags ||= Set.new
+      end
+      def start_element(tag, attrs = [])
+        html_tags << tag
         attrs.each do |name, value|
           if name == "class"
-            css_classes << value.split
+            css_classes.merge(value.split)
           end
         end
       end
@@ -61,13 +73,18 @@ module SeeLessEssEss
     def unused(simple)
       if simple.is_a?(Sass::Selector::Class)
         !css_classes_whitelist.include?(simple.name[0].to_s)
+      elsif simple.is_a?(Sass::Selector::Element)
+        !html_tags_whitelist.include?(simple.name[0].to_s)
       else
         false
       end
     end
 
     def css_classes_whitelist
-      @whitelist ||= @extractor.css_classes + @used_classes
+      @class_whitelist ||= @extractor.css_classes + @used_classes
+    end
+    def html_tags_whitelist
+      @tag_whitelist ||= @extractor.html_tags
     end
   end
 
