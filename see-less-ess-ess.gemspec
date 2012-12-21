@@ -1,8 +1,10 @@
 # -*- encoding: utf-8 -*-
 
+require File.expand_path('../lib/see-less-ess-ess', __FILE__)
+
 Gem::Specification.new do |gem|
   gem.name          = "see-less-ess-ess"
-  gem.version       = '0.0.1'
+  gem.version       = SeeLessEssEss::VERSION
   gem.authors       = ["Glen Mailer"]
   gem.email         = ["glenjamin@gmail.com"]
   gem.description   = %q{Remove unused CSS rules from a compass project by scanning template files}
